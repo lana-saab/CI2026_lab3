@@ -1,0 +1,151 @@
+My approach:
+
+1. Start with one arrangement.
+2. Swap two items.
+3. Calculate the new score.
+4. Keep the new arrangement only if the score improves.
+5.Repeat.
+
+# CI2026 — Children in a Circle
+
+## Problem Description
+
+This project addresses the *Children in a Circle* optimization problem using **hill climbing**, a local search optimization technique.
+
+We have \(N\) children, each characterized by \(C\) Boolean attributes. The difference between two children is defined as the number of attributes in which they differ.
+
+The objective is to arrange the children in a circle such that the sum of the differences between adjacent children is maximized.
+
+The circle is closed, meaning that the last child is also considered adjacent to the first child.
+
+## Implementation
+
+### 1. Representing the Children
+
+Each child is represented by an `Item` object containing:
+
+- **Title:** A unique identifier for the child.
+- **Attributes:** A tuple of Boolean values representing the child's characteristics.
+
+The implementation uses the following parameters:
+
+```python
+TOTAL_ITEMS = 15
+TOTAL_ATTRIBUTES = 20
+```
+
+The Boolean attributes are generated randomly using Python's `sample()` function with replacement, allowing each characteristic to be either `True` or `False`.
+
+### 2. Calculating the Difference
+
+The `Item.distance()` method calculates the difference between two children by counting the positions at which their Boolean attributes disagree.
+
+This is equivalent to the Hamming distance between two Boolean vectors.
+
+For two children \(A\) and \(B\), the distance is:
+
+\[
+d(A,B)=\sum_{i=1}^{C}\mathbf{1}[A_i\neq B_i]
+\]
+
+The distance ranges from \(0\), when all attributes match, to \(C\), when all attributes differ.
+
+### 3. Fitness Function
+
+The `evaluate_score()` function evaluates a complete circular arrangement by summing the distances between all adjacent children.
+
+The last child is connected to the first using the modulo operator.
+
+\[
+f(S)=\sum_{i=0}^{N-1}d(S_i,S_{(i+1)\bmod N})
+\]
+
+The goal is to **maximize the fitness score**, so that neighboring children have as many different characteristics as possible.
+
+For the configured problem, the theoretical upper bound is:
+
+\[
+f_{\max}=N\times C=15\times20=300
+\]
+
+This is an upper bound; it is not necessarily achievable for a particular collection of randomly generated children.
+
+### 4. Mutation Operator
+
+The `mutate()` function generates a neighboring solution by randomly selecting two distinct positions and swapping their children.
+
+The function creates a copy of the original arrangement before performing the swap, leaving the original list unchanged.
+
+This operation explores alternative arrangements while preserving the collection of children and the circular structure.
+
+### 5. Hill-Climbing Algorithm
+
+The algorithm starts with the initial arrangement and calculates its fitness.
+
+It then performs 10,000 iterations. During each iteration:
+
+1. Generate a candidate arrangement using the mutation operator.
+2. Calculate the candidate's fitness.
+3. Compare it with the best fitness found so far.
+4. Accept the candidate only if its fitness is strictly higher.
+
+This greedy strategy ensures that the accepted fitness never decreases. However, it can become trapped in a local optimum because worse solutions are never accepted.
+
+The algorithm returns the best arrangement encountered during the search, which is not guaranteed to be the global optimum.
+
+## Experimental Results
+
+For one execution, the program produced the following results:
+
+| Metric | Value |
+|---|---:|
+| Number of children | 15 |
+| Boolean characteristics per child | 20 |
+| Initial fitness | 158 |
+| Best reported fitness | 188 |
+| Fitness improvement | 30 |
+| Number of iterations | 10,000 |
+| Theoretical maximum fitness | 300 |
+
+The fitness increased from 158 to 188, representing an improvement of approximately 19% over the initial score.
+
+These results demonstrate that local search can improve the arrangement by repeatedly accepting beneficial swaps.
+
+Results may vary when the randomly generated attributes or initial arrangement change.
+
+## Limitations and Possible Improvements
+
+The current implementation has several limitations:
+
+- Local optima:The search may stop improving before reaching the global optimum.
+- Single initial solution:The algorithm explores only one search trajectory.
+- Greedy acceptance: Candidate arrangements with lower or equal fitness are rejected.
+- Random initialization: Different input attributes can produce different outcomes.
+
+Possible improvements include:
+
+- Running hill climbing multiple times with different initial arrangements.
+- Implementing simulated annealing to allow occasional acceptance of worse solutions.
+- Comparing different mutation operators and iteration counts.
+- Comparing hill climbing with evolutionary algorithms using population-based search.
+
+## Requirements
+
+- Python 3
+- No external libraries are required for the core implementation.
+
+## How to Run
+
+Save the implementation in a file named `main.py` and run:
+
+```bash
+python main.py
+```
+
+The program generates the children, evaluates the initial arrangement, performs the hill-climbing search, and prints the resulting arrangement and its fitness score.
+
+## Conclusion
+
+This project demonstrates the application of hill climbing to a combinatorial optimization problem. By representing children as Boolean vectors and using random swaps to explore neighboring arrangements, the algorithm improves the total difference between adjacent children.
+
+The implementation provides a simple baseline for studying local search and comparing it with more advanced optimization techniques, including evolutionary computation.
